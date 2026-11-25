@@ -6,8 +6,9 @@
 <title>Menú digital</title>
 <style>
   :root {
-    --color: #25a55f;        /* color principal (verde WhatsApp) */
-    --color-oscuro: #1b7d47;
+    --color: #e8772e;        /* naranja del menú */
+    --color-oscuro: #c45f1c;
+    --cafe: #4a2a1a;
     --fondo: #f6f7f9;
     --texto: #1d2329;
     --gris: #6b7480;
@@ -18,9 +19,10 @@
     background: var(--fondo); color: var(--texto); padding-bottom: 90px;
   }
   header {
-    background: var(--color); color: #fff; padding: 24px 16px 18px; text-align: center;
+    background: var(--cafe); color: #fff; padding: 24px 16px 18px; text-align: center;
   }
-  header h1 { margin: 0 0 4px; font-size: 1.6rem; }
+  header h1 { margin: 0 0 4px; font-size: 1.8rem; color: #f5a646; letter-spacing: .5px; }
+  .aviso { display: inline-block; margin-top: 10px; background: rgba(255,255,255,.14); padding: 5px 12px; border-radius: 999px; font-size: .85rem; }
   header p { margin: 0; opacity: .9; font-size: .95rem; }
   nav {
     position: sticky; top: 0; z-index: 5; background: #fff; display: flex; gap: 8px;
@@ -34,7 +36,7 @@
   h2 { margin: 22px 4px 10px; font-size: 1.15rem; scroll-margin-top: 60px; }
   .producto {
     background: #fff; border-radius: 14px; padding: 12px; margin-bottom: 10px;
-    display: flex; gap: 12px; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,.05);
+    display: flex; gap: 12px; align-items: flex-start; box-shadow: 0 1px 3px rgba(0,0,0,.05);
   }
   .producto img {
     width: 76px; height: 76px; object-fit: cover; border-radius: 10px; flex: none; background: #eee;
@@ -54,6 +56,9 @@
   }
   .contador button.menos { background: #e4e7eb; color: var(--texto); }
   .contador span { min-width: 18px; text-align: center; font-weight: 600; }
+  .contador + .contador { margin-top: 6px; padding-top: 6px; border-top: 1px solid #f0f1f3; }
+  .variante { font-size: .85rem; color: var(--gris); margin-right: 6px; }
+  .opciones label:has(input:checked) { border-color: var(--color); background: #fdf1e8; }
 
   .barra {
     position: fixed; left: 0; right: 0; bottom: 0; padding: 12px; background: #fff;
@@ -92,7 +97,6 @@
   }
   .opciones input { display: none; }
   .opciones input:checked + span { color: var(--color-oscuro); font-weight: 700; }
-  .opciones label:has(input:checked) { border-color: var(--color); background: #eaf7ef; }
   .oculto { display: none; }
   .error { color: #c62828; font-size: .85rem; margin-top: 8px; min-height: 1em; }
   footer { text-align: center; color: var(--gris); font-size: .8rem; padding: 20px; }
@@ -105,40 +109,45 @@
    ✏️  EDITA AQUÍ LOS DATOS DE TU NEGOCIO
    ========================================================= */
 const NEGOCIO = {
-  nombre: "Mi Negocio",
-  descripcion: "Haz tu pedido y te lo confirmamos por WhatsApp",
-  // Número de WhatsApp Business con código de país, SOLO dígitos (sin +, espacios ni guiones)
-  // Ejemplo México: 5215512345678 · Colombia: 573001234567 · España: 34612345678
-  whatsapp: "5215512345678",
+  nombre: "Angel Hamburguesas",
+  descripcion: "Arma tu pedido y envíalo por WhatsApp",
+  // Número de WhatsApp con código de país, SOLO dígitos (52 = México)
+  whatsapp: "525523475543",
   moneda: "$",
-  costoEnvio: 30,          // pon 0 si el envío es gratis
+  costoEnvio: 0,           // costo de envío a domicilio; 0 = no se cobra / se confirma por WhatsApp
   ofreceEnvio: true,       // false si solo hay recoger en local
-  horario: "Lunes a sábado · 9:00 a 21:00",
+  horario: "🗓️ Servicio solo sábados y domingos",
 };
 
-// Categorías y productos. "imagen" es opcional (URL de una foto); si no hay, se usa el emoji.
+// Categorías y productos.
+// - Con un solo precio: { nombre, descripcion, precio, emoji }
+// - Con varias opciones: { nombre, descripcion, emoji, variantes: [{ nombre, precio }, ...] }
+// "imagen" es opcional (URL de una foto); si no hay, se usa el emoji.
 const MENU = [
   {
-    categoria: "Comida",
+    categoria: "Hamburguesas",
     productos: [
-      { nombre: "Hamburguesa clásica", descripcion: "Carne, queso, lechuga y tomate", precio: 95, emoji: "🍔" },
-      { nombre: "Tacos al pastor (3)", descripcion: "Con piña, cebolla y cilantro", precio: 60, emoji: "🌮" },
-      { nombre: "Pizza individual", descripcion: "Pepperoni o hawaiana", precio: 110, emoji: "🍕" },
+      { nombre: "Clásica", descripcion: "Carne de res, queso amarillo, jitomate, cebolla, lechuga", emoji: "🍔",
+        variantes: [{ nombre: "Sencilla", precio: 50 }, { nombre: "Con papas", precio: 65 }] },
+      { nombre: "Clásica doble", descripcion: "Carne doble de res, doble queso amarillo, jitomate, cebolla, lechuga", emoji: "🍔",
+        variantes: [{ nombre: "Sencilla", precio: 70 }, { nombre: "Con papas", precio: 80 }] },
+      { nombre: "Western", descripcion: "Carne de res, aros de cebolla, cebolla guisada, salsa BBQ, queso amarillo", emoji: "🧅",
+        variantes: [{ nombre: "Sencilla", precio: 70 }, { nombre: "Con papas", precio: 80 }] },
+      { nombre: "Hawaiana", descripcion: "Carne de res, jamón, piña, bañada en salsa BBQ, queso amarillo", emoji: "🍍",
+        variantes: [{ nombre: "Sencilla", precio: 60 }, { nombre: "Con papas", precio: 70 }] },
+      { nombre: "Crispy / Pollo", descripcion: "Pechuga de pollo estilo KFC bañada en nuestro aderezo especial", emoji: "🍗",
+        variantes: [{ nombre: "Sencilla", precio: 80 }, { nombre: "Con papas", precio: 90 }] },
+      { nombre: "Crunchy / Guacamole", descripcion: "Carne de res, tocino, salchicha, guacamole, con aderezo ranch", emoji: "🥑",
+        variantes: [{ nombre: "Sencilla", precio: 80 }, { nombre: "Con papas", precio: 90 }] },
+      { nombre: "Norteña / Ranchera", descripcion: "Carne de res, tocino, salchicha, queso blanco, chorizo", emoji: "🤠",
+        variantes: [{ nombre: "Sencilla", precio: 80 }, { nombre: "Con papas", precio: 90 }] },
     ],
   },
   {
-    categoria: "Bebidas",
+    categoria: "Hot dogs",
     productos: [
-      { nombre: "Agua fresca", descripcion: "Horchata, jamaica o limón (500 ml)", precio: 25, emoji: "🥤" },
-      { nombre: "Refresco", descripcion: "Lata 355 ml", precio: 22, emoji: "🥫" },
-      { nombre: "Café americano", descripcion: "", precio: 30, emoji: "☕" },
-    ],
-  },
-  {
-    categoria: "Postres",
-    productos: [
-      { nombre: "Pastel de chocolate", descripcion: "Rebanada", precio: 45, emoji: "🍰" },
-      { nombre: "Helado", descripcion: "Vainilla, fresa o chocolate", precio: 35, emoji: "🍨" },
+      { nombre: "Orden de hot dog", descripcion: "", emoji: "🌭",
+        variantes: [{ nombre: "1 hot dog", precio: 20 }, { nombre: "3 hot dogs", precio: 50 }] },
     ],
   },
 ];
@@ -148,6 +157,7 @@ const MENU = [
 <header>
   <h1 id="nombreNegocio"></h1>
   <p id="descNegocio"></p>
+  <span class="aviso" id="horario"></span>
 </header>
 <nav id="nav"></nav>
 <main id="menu"></main>
@@ -184,7 +194,6 @@ const MENU = [
     <select id="pago">
       <option>Efectivo</option>
       <option>Transferencia</option>
-      <option>Tarjeta</option>
     </select>
 
     <label for="notas">Notas (opcional)</label>
@@ -203,7 +212,8 @@ const carrito = {}; // clave "c-p" -> cantidad
 document.title = NEGOCIO.nombre + " · Menú";
 $("nombreNegocio").textContent = NEGOCIO.nombre;
 $("descNegocio").textContent = NEGOCIO.descripcion;
-$("pie").textContent = NEGOCIO.horario;
+$("horario").textContent = NEGOCIO.horario;
+$("pie").textContent = NEGOCIO.nombre;
 if (!NEGOCIO.ofreceEnvio) $("bloqueEntrega").classList.add("oculto");
 
 // Pintar menú
@@ -217,7 +227,6 @@ MENU.forEach((cat, ci) => {
   $("menu").appendChild(h2);
 
   cat.productos.forEach((p, pi) => {
-    const key = ci + "-" + pi;
     const div = document.createElement("div");
     div.className = "producto";
     const visual = p.imagen
@@ -225,25 +234,39 @@ MENU.forEach((cat, ci) => {
       : Object.assign(document.createElement("div"), { className: "emoji", textContent: p.emoji || "🍽️" });
     const info = document.createElement("div");
     info.className = "info";
-    info.innerHTML = `<h3></h3><p></p><div class="contador">
-        <span class="precio"></span><span style="flex:1"></span>
-        <button class="menos" aria-label="Quitar">−</button><span class="cant">0</span>
-        <button class="mas" aria-label="Agregar">+</button></div>`;
+    info.innerHTML = "<h3></h3><p></p>";
     info.querySelector("h3").textContent = p.nombre;
     const desc = info.querySelector("p");
     if (p.descripcion) desc.textContent = p.descripcion; else desc.remove();
-    info.querySelector(".precio").textContent = dinero(p.precio);
-    info.querySelector(".mas").onclick = () => cambiar(key, 1);
-    info.querySelector(".menos").onclick = () => cambiar(key, -1);
+
+    const variantes = p.variantes || [{ nombre: "", precio: p.precio }];
+    variantes.forEach((v, vi) => {
+      const key = `${ci}-${pi}-${vi}`;
+      const fila = document.createElement("div");
+      fila.className = "contador";
+      fila.dataset.key = key;
+      fila.innerHTML = `<span class="variante"></span><span class="precio"></span><span style="flex:1"></span>
+        <button class="menos" aria-label="Quitar">−</button><span class="cant">0</span>
+        <button class="mas" aria-label="Agregar">+</button>`;
+      const nv = fila.querySelector(".variante");
+      if (v.nombre) nv.textContent = v.nombre; else nv.remove();
+      fila.querySelector(".precio").textContent = dinero(v.precio);
+      fila.querySelector(".mas").onclick = () => cambiar(key, 1);
+      fila.querySelector(".menos").onclick = () => cambiar(key, -1);
+      info.appendChild(fila);
+    });
     div.append(visual, info);
-    div.dataset.key = key;
     $("menu").appendChild(div);
   });
 });
 
+// Devuelve { nombre, precio } del producto/variante elegido
 function producto(key) {
-  const [c, p] = key.split("-").map(Number);
-  return MENU[c].productos[p];
+  const [c, p, v] = key.split("-").map(Number);
+  const prod = MENU[c].productos[p];
+  if (!prod.variantes) return { nombre: prod.nombre, precio: prod.precio };
+  const vari = prod.variantes[v];
+  return { nombre: `${prod.nombre} (${vari.nombre})`, precio: vari.precio };
 }
 function entrega() {
   return NEGOCIO.ofreceEnvio ? document.querySelector('input[name="entrega"]:checked').value : "Recoger en local";
