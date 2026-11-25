@@ -99,6 +99,11 @@
   .opciones input:checked + span { color: var(--color-oscuro); font-weight: 700; }
   .oculto { display: none; }
   .error { color: #c62828; font-size: .85rem; margin-top: 8px; min-height: 1em; }
+  .nota {
+    background: #fff7ed; border: 1px solid #f5c99b; border-left: 5px solid var(--color);
+    border-radius: 12px; padding: 12px 14px; margin: 14px 0 4px; font-size: .92rem; line-height: 1.4;
+  }
+  .nota b { color: var(--color-oscuro); }
   footer { text-align: center; color: var(--gris); font-size: .8rem; padding: 20px; }
 </style>
 </head>
@@ -117,6 +122,8 @@ const NEGOCIO = {
   costoEnvio: 0,           // costo de envío a domicilio; 0 = no se cobra / se confirma por WhatsApp
   ofreceEnvio: true,       // false si solo hay recoger en local
   horario: "🗓️ Servicio solo sábados y domingos",
+  // Aviso que se muestra arriba del menú (déjalo vacío "" para ocultarlo)
+  nota: "📝 <b>¿Quieres algún cambio?</b> Algunos de nuestros productos se pueden personalizar (por ejemplo, sin cebolla o sin jitomate). Escríbelo en <b>Notas o cambios</b> al hacer tu pedido y con gusto lo preparamos a tu manera, siempre que sea posible.",
 };
 
 // Categorías y productos.
@@ -174,7 +181,9 @@ const MENU = [
   <span class="aviso" id="horario"></span>
 </header>
 <nav id="nav"></nav>
-<main id="menu"></main>
+<main id="menu">
+  <div class="nota" id="nota"></div>
+</main>
 <footer id="pie"></footer>
 
 <div class="barra" id="barra">
@@ -210,8 +219,8 @@ const MENU = [
       <option>Transferencia</option>
     </select>
 
-    <label for="notas">Notas (opcional)</label>
-    <textarea id="notas" placeholder="Ej. sin cebolla, pago con billete de 500"></textarea>
+    <label for="notas">Notas o cambios (opcional)</label>
+    <textarea id="notas" placeholder="Ej. Clásica sin cebolla, Western sin salsa BBQ, pago con billete de 500"></textarea>
 
     <div class="error" id="error"></div>
     <button class="btn" id="enviar" style="justify-content:center;margin-top:10px">Enviar pedido por WhatsApp</button>
@@ -227,6 +236,7 @@ document.title = NEGOCIO.nombre + " · Menú";
 $("nombreNegocio").textContent = NEGOCIO.nombre;
 $("descNegocio").textContent = NEGOCIO.descripcion;
 $("horario").textContent = NEGOCIO.horario;
+if (NEGOCIO.nota) $("nota").innerHTML = NEGOCIO.nota; else $("nota").remove();
 $("pie").textContent = NEGOCIO.nombre;
 if (!NEGOCIO.ofreceEnvio) $("bloqueEntrega").classList.add("oculto");
 
@@ -351,7 +361,7 @@ $("enviar").onclick = () => {
   if (envio()) msg += `• Envío — ${dinero(envio())}\n`;
   msg += `\n💰 *Total: ${dinero(subtotal() + envio())}*`;
   const notas = $("notas").value.trim();
-  if (notas) msg += `\n\n📝 *Notas:* ${notas}`;
+  if (notas) msg += `\n\n📝 *Notas o cambios:* ${notas}`;
 
   window.open(`https://wa.me/${NEGOCIO.whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
 };
